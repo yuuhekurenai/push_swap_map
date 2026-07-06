@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>push_swap — Guia Visual Completo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a1626;
+  --bg-grid:rgba(255,255,255,0.045);
+  --surface:#0f2038;
+  --surface-2:#152c4a;
+  --surface-3:#1c3a5e;
+  --border:#254876;
+  --border-strong:#3c6798;
+  --ink:#edf4fb;
+  --ink-dim:#9db4cf;
+  --ink-mute:#6d84a0;
+  --accent:#5ec8f2;
+  --accent-ink:#04212f;
+  --warn:#f2b84b;
+  --warn-ink:#3a2705;
+  --danger:#f2726f;
+  --danger-ink:#3a1210;
+  --success:#72d9a0;
+  --success-ink:#0c2417;
+  --pro:#c09bef;
+  --pro-ink:#241238;
+  --neutral:#93a7bf;
+  --neutral-ink:#1c2c3f;
+  --font-display:'Space Grotesk',sans-serif;
+  --font-body:'IBM Plex Sans',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+  --radius:12px;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:
+    linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0/40px 40px,
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px) 0 0/40px 40px,
+    var(--bg);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:15px;
+  line-height:1.6;
+  min-height:100vh;
+}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;margin:0;letter-spacing:-0.01em;}
+code, .mono{font-family:var(--font-mono);}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px 80px;}
+
+/* ---------- Top bar ---------- */
+#topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(10,22,38,0.92);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);
+}
+#topbar-inner{max-width:980px;margin:0 auto;padding:14px 20px 0;}
+.brand{display:flex;align-items:baseline;gap:10px;padding-bottom:12px;}
+.brand .tag{font-family:var(--font-mono);font-size:11px;color:var(--accent);border:1px solid var(--border-strong);border-radius:999px;padding:2px 9px;letter-spacing:.04em;}
+.brand h1{font-size:19px;}
+.brand .sub{color:var(--ink-mute);font-size:12.5px;font-family:var(--font-mono);}
+#tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:0;}
+#tabs::-webkit-scrollbar{display:none;}
+#tabs button{
+  flex:0 0 auto;
+  background:none;border:none;
+  color:var(--ink-dim);
+  font-family:var(--font-mono);
+  font-size:13px;
+  padding:10px 14px 12px;
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  white-space:nowrap;
+}
+#tabs button:hover{color:var(--ink);}
+#tabs button.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* ---------- Sections ---------- */
+section.page{display:none;padding-top:30px;animation:fadein .3s ease;}
+section.page.active{display:block;}
+@keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+.eyebrow{font-family:var(--font-mono);font-size:11.5px;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;display:block;}
+.page-title{font-size:28px;margin-bottom:6px;}
+.page-desc{color:var(--ink-dim);max-width:620px;margin-bottom:30px;}
+
+/* ---------- Cards / sheets ---------- */
+.sheet{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  margin-bottom:22px;
+  overflow:hidden;
+}
+.sheet-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,var(--surface-2),var(--surface));
+}
+.sheet-head .fn{font-family:var(--font-mono);font-size:15.5px;color:var(--ink);}
+.sheet-head .fn .paren{color:var(--ink-mute);}
+.sheet-head .part{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-mute);border:1px solid var(--border-strong);border-radius:6px;padding:2px 8px;letter-spacing:.05em;}
+.sheet-body{padding:20px;}
+.sheet-note{color:var(--ink-dim);font-size:13.5px;margin:0 0 14px;}
+.alias{font-size:12.5px;color:var(--ink-mute);font-style:italic;margin:-6px 0 14px;}
+
+/* ---------- Flow diagrams (static) ---------- */
+.flow{display:flex;flex-direction:column;align-items:center;}
+.flow-box{
+  width:100%;max-width:540px;
+  background:var(--surface-2);
+  border:1px solid var(--border-strong);
+  border-radius:10px;
+  padding:12px 16px;
+  font-size:13.5px;
+}
+.flow-box .code{display:block;color:var(--accent);font-size:13px;margin-bottom:4px;}
+.flow-box .why{color:var(--ink-dim);font-size:12.5px;}
+.flow-connector{width:2px;height:22px;background:var(--border-strong);position:relative;margin:2px auto;}
+.flow-connector::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--border-strong);}
+.flow-decision-row{display:flex;align-items:stretch;gap:14px;width:100%;max-width:640px;}
+.flow-decision-box{flex:1 1 auto;max-width:540px;background:var(--surface-2);border:1px dashed var(--border-strong);border-radius:10px;padding:12px 16px;font-size:13.5px;}
+.flow-decision-box .code{color:var(--warn);display:block;margin-bottom:2px;}
+.flow-branch{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+.flow-branch-arrow{width:26px;height:2px;background:var(--danger);position:relative;}
+.flow-branch-arrow::after{content:'';position:absolute;right:-1px;top:50%;transform:translateY(-50%);border:5px solid transparent;border-left-color:var(--danger);}
+.flow-branch-box{background:var(--danger-ink);border:1px solid var(--danger);color:#ffd9d7;border-radius:8px;padding:9px 12px;font-size:12.5px;min-width:150px;}
+.flow-branch-box b{color:var(--danger);}
+.no-label{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-mute);margin:-14px 0 4px 12px;align-self:flex-start;}
+
+/* ---------- Stack comic (reusable JS component) ---------- */
+.comic-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-dim);margin-bottom:10px;}
+.comic-legend span{display:inline-flex;align-items:center;gap:5px;}
+.legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.comic-stage{position:relative;height:230px;margin-bottom:6px;}
+.comic-collabel{position:absolute;font-size:11.5px;color:var(--ink-mute);font-family:var(--font-mono);}
+.comic-topo{position:absolute;font-size:10.5px;color:var(--ink-mute);}
+.comic-node{
+  position:absolute;width:118px;height:42px;border-radius:8px;
+  background:var(--surface-3);border:1px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:600;color:var(--ink);
+  transition:top .4s ease, left .4s ease, background .3s ease, border-color .3s ease, opacity .3s ease;
+}
+.comic-node .chip{position:absolute;top:-21px;left:50%;transform:translateX(-50%);font-size:10.5px;padding:2px 7px;border-radius:6px;white-space:nowrap;opacity:0;transition:opacity .3s ease;font-family:var(--font-mono);}
+.comic-node.is-freed{opacity:.2;}
+.pin-danger{border-color:var(--danger)!important;background:var(--danger-ink)!important;color:#ffd9d7!important;}
+.pin-danger .chip{opacity:1!important;background:var(--danger);color:var(--danger-ink);}
+.pin-accent{border-color:var(--accent)!important;background:var(--accent-ink)!important;color:#cdeeff!important;}
+.pin-accent .chip{opacity:1!important;background:var(--accent);color:var(--accent-ink);}
+.pin-pro{border-color:var(--pro)!important;background:var(--pro-ink)!important;color:#ebdcff!important;}
+.pin-pro .chip{opacity:1!important;background:var(--pro);color:var(--pro-ink);}
+.pin-success{border-color:var(--success)!important;background:var(--success-ink)!important;color:#c9f5dd!important;}
+.pin-success .chip{opacity:1!important;background:var(--success);color:var(--success-ink);}
+.pin-warn{border-color:var(--warn)!important;background:var(--warn-ink)!important;color:#ffe6b3!important;}
+.pin-warn .chip{opacity:1!important;background:var(--warn);color:var(--warn-ink);}
+.comic-code{font-family:var(--font-mono);font-size:12.5px;background:var(--surface-2);border-radius:8px;padding:8px 12px;margin-top:10px;color:var(--ink);}
+.comic-why{font-size:13px;color:var(--ink-dim);margin-top:8px;min-height:36px;}
+.comic-nav{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;}
+.comic-nav button{
+  font-family:var(--font-body);font-size:12.5px;
+  background:var(--surface-2);border:1px solid var(--border-strong);color:var(--ink);
+  border-radius:7px;padding:6px 12px;cursor:pointer;min-width:84px;
+}
+.comic-nav button:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
+.comic-nav button:disabled{opacity:.35;cursor:default;}
+.comic-counter{font-size:12px;color:var(--ink-mute);font-family:var(--font-mono);min-width:80px;text-align:center;}
+.comic-dots{display:flex;gap:5px;justify-content:center;margin-top:9px;}
+.comic-dots .d{width:6px;height:6px;border-radius:50%;background:var(--border-strong);cursor:pointer;}
+.comic-dots .d.active{background:var(--accent);width:15px;border-radius:3px;}
+
+/* ---------- Case selector (sort_three) ---------- */
+.case-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.case-tabs button{
+  font-family:var(--font-mono);font-size:12px;
+  background:var(--surface-2);border:1px solid var(--border-strong);color:var(--ink-dim);
+  border-radius:7px;padding:6px 10px;cursor:pointer;
+}
+.case-tabs button.active{background:var(--accent-ink);border-color:var(--accent);color:var(--accent);}
+.case-row{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.case-boxes{display:flex;gap:8px;}
+.case-box{width:52px;height:52px;border-radius:8px;background:var(--surface-3);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;}
+.case-arrow{color:var(--ink-mute);font-size:20px;}
+.case-conditions{display:flex;flex-direction:column;gap:4px;font-family:var(--font-mono);font-size:12px;}
+.case-conditions .c{color:var(--ink-mute);}
+.case-conditions .c.yes{color:var(--success);}
+.case-conditions .c.no{color:var(--danger);}
+.case-result{font-family:var(--font-mono);font-size:14px;background:var(--warn-ink);border:1px solid var(--warn);color:var(--warn);border-radius:8px;padding:8px 14px;}
+
+/* ---------- Utils grid ---------- */
+.util-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+.util-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.util-card h4{font-family:var(--font-mono);font-size:14px;margin-bottom:8px;color:var(--ink);}
+.util-card p{font-size:12.8px;color:var(--ink-dim);margin:0 0 10px;}
+.util-example{font-family:var(--font-mono);font-size:12px;background:var(--surface-2);border-radius:7px;padding:8px 10px;color:var(--ink-dim);}
+.util-example b{color:var(--accent);}
+.console-line{font-family:var(--font-mono);font-size:12.5px;border-radius:7px;padding:7px 10px;}
+.console-out{background:var(--success-ink);color:var(--success);}
+.console-err{background:var(--danger-ink);color:var(--danger);}
+
+/* ---------- Benchmark gauges ---------- */
+.gauge-wrap{margin-bottom:26px;}
+.gauge-title{font-family:var(--font-mono);font-size:13.5px;color:var(--ink);margin-bottom:8px;}
+.gauge{position:relative;height:34px;border-radius:8px;overflow:hidden;background:var(--surface-2);border:1px solid var(--border);}
+.gauge-zone{position:absolute;top:0;bottom:0;}
+.gauge-marker{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--ink);}
+.gauge-marker .lbl{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-family:var(--font-mono);font-size:10.5px;color:var(--ink-dim);white-space:nowrap;}
+.gauge-legend{display:flex;gap:16px;margin-top:22px;font-size:11.5px;color:var(--ink-dim);font-family:var(--font-mono);}
+.gauge-legend span{display:inline-flex;align-items:center;gap:5px;}
+
+/* ---------- Overview architecture ---------- */
+.arch-badges{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0 8px;}
+.arch-badge{font-family:var(--font-mono);font-size:12px;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:999px;padding:6px 14px;color:var(--ink-dim);}
+.arch-badge b{color:var(--accent);}
+.hero-stacks{display:flex;justify-content:center;gap:48px;margin:26px 0 34px;}
+.hero-col{display:flex;flex-direction:column;gap:6px;align-items:center;}
+.hero-col .lbl{font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);margin-bottom:4px;}
+.hero-block{width:64px;height:34px;border-radius:6px;background:var(--surface-3);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:13px;font-weight:600;animation:pulse 3.6s ease-in-out infinite;}
+.hero-block:nth-child(2){animation-delay:.5s;}
+.hero-block:nth-child(3){animation-delay:1s;}
+@keyframes pulse{0%,100%{border-color:var(--border-strong);}20%{border-color:var(--danger);}40%{border-color:var(--accent);}60%{border-color:var(--pro);}80%{border-color:var(--success);}}
+.note-callout{background:var(--surface-2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 16px;font-size:13px;color:var(--ink-dim);margin:18px 0;}
+
+footer{text-align:center;color:var(--ink-mute);font-family:var(--font-mono);font-size:11.5px;padding:30px 20px;}
+
+@media (max-width:640px){
+  .hero-stacks{gap:24px;}
+  .flow-decision-row{flex-direction:column;}
+  .flow-branch{margin-left:12px;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;}
+}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div id="topbar-inner">
+    <div class="brand">
+      <h1>push_swap</h1>
+      <span class="tag">42 School</span>
+      <span class="sub">guia visual · gcelesti</span>
+    </div>
+    <div id="tabs">
+      <button data-target="overview" class="active">Visão geral</button>
+      <button data-target="mainc">main.c</button>
+      <button data-target="parser">parser.c</button>
+      <button data-target="sorting">sorting.c</button>
+      <button data-target="utils">utils.c</button>
+      <button data-target="benchmark">benchmark</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ============================================================ OVERVIEW -->
+<section class="page active" id="overview">
+  <span class="eyebrow">Mapa do projeto</span>
+  <h2 class="page-title">Duas pilhas, um objetivo</h2>
+  <p class="page-desc">push_swap ordena uma lista de números usando só duas pilhas (A e B) e um conjunto fixo de 11 operações. Este guia cobre <b style="color:var(--ink)">main.c, parser.c, sorting.c, utils.c</b> e as metas de <b style="color:var(--ink)">benchmark</b>. As 11 operações (sa, sb, ss, pa, pb, ra, rb, rr, rra, rrb, rrr) já foram cobertas no quadrinho interativo anterior.</p>
+
+  <div class="hero-stacks">
+    <div class="hero-col">
+      <span class="lbl">PILHA A</span>
+      <div class="hero-block">5</div>
+      <div class="hero-block">3</div>
+      <div class="hero-block">8</div>
+    </div>
+    <div class="hero-col">
+      <span class="lbl">PILHA B</span>
+      <div class="hero-block">9</div>
+      <div class="hero-block">2</div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-head"><span class="fn">fluxo do programa</span><span class="part">ARQUITETURA</span></div>
+    <div class="sheet-body">
+      <div class="flow">
+        <div class="flow-box"><span class="code">main()</span><span class="why">Lê os argumentos da linha de comando.</span></div>
+        <div class="flow-connector"></div>
+        <div class="flow-box"><span class="code">parser.c</span><span class="why">Converte strings em uma lista encadeada, valida overflow e duplicados.</span></div>
+        <div class="flow-connector"></div>
+        <div class="flow-box"><span class="code">sorting.c</span><span class="why">Escolhe o algoritmo certo pelo tamanho: sort_three, sort_five ou sort_big.</span></div>
+        <div class="flow-connector"></div>
+        <div class="flow-box"><span class="code">operations.c ✓ já visto</span><span class="why">sa, sb, ss, pa, pb, ra, rb, rr, rra, rrb, rrr — os únicos movimentos permitidos.</span></div>
+        <div class="flow-connector"></div>
+        <div class="flow-box"><span class="code">utils.c</span><span class="why">is_sorted, stack_size, find_min/max, get_index, free_stack e as funções de print.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arch-badges">
+    <span class="arch-badge"><b>5</b> funções em parser.c</span>
+    <span class="arch-badge"><b>4</b> funções em sorting.c</span>
+    <span class="arch-badge"><b>11</b> operações em operations.c</span>
+    <span class="arch-badge"><b>9</b> helpers em utils.c</span>
+    <span class="arch-badge">meta: <b>&lt;700</b> ops para 100 números</span>
+  </div>
+</section>
+
+<!-- ============================================================ MAIN.C -->
+<section class="page" id="mainc">
+  <span class="eyebrow">main.c</span>
+  <h2 class="page-title">A função principal</h2>
+  <p class="page-desc">Seis passos simples: iniciar, validar, ordenar, limpar. Toda a inteligência do programa está nas outras camadas — main.c só orquestra a ordem de chamadas.</p>
+
+  <div class="sheet">
+    <div class="sheet-head"><span class="fn">int <b style="color:var(--accent)">main</b>(int argc, char **argv)</span><span class="part">FUNC. 01</span></div>
+    <div class="sheet-body">
+      <div class="flow">
+
+        <div class="flow-box"><span class="code">t_list *stack_a = NULL; t_list *stack_b = NULL;</span><span class="why">As duas pilhas começam vazias.</span></div>
+        <div class="flow-connector"></div>
+
+        <div class="flow-decision-row">
+          <div class="flow-decision-box"><span class="code">argc &lt; 2 ?</span><span class="why">Sem argumentos, não há o que ordenar.</span></div>
+          <div class="flow-branch">
+            <div class="flow-branch-arrow"></div>
+            <div class="flow-branch-box"><b>SIM →</b> return (0); — programa encerra sem fazer nada.</div>
+          </div>
+        </div>
+        <div class="no-label">não ↓</div>
+        <div class="flow-connector"></div>
+
+        <div class="flow-box"><span class="code">parse_args(argc, argv, &amp;stack_a)</span><span class="why">Converte cada argumento em número e monta a lista encadeada.</span></div>
+        <div class="flow-connector"></div>
+
+        <div class="flow-decision-row">
+          <div class="flow-decision-box"><span class="code">parse_args() falhou ?</span><span class="why">Entrada inválida: overflow, caractere estranho ou duplicado.</span></div>
+          <div class="flow-branch">
+            <div class="flow-branch-arrow"></div>
+            <div class="flow-branch-box"><b>SIM →</b> print_error(); free_stack(&amp;stack_a); return (1);</div>
+          </div>
+        </div>
+        <div class="no-label">não ↓</div>
+        <div class="flow-connector"></div>
+
+        <div class="flow-decision-row">
+          <div class="flow-decision-box"><span class="code">is_sorted(stack_a) ?</span><span class="why">Se já estiver ordenado, nenhuma operação precisa ser impressa.</span></div>
+          <div class="flow-branch">
+            <div class="flow-branch-arrow"></div>
+            <div class="flow-branch-box"><b>SIM →</b> free_stack(&amp;stack_a); return (0); — sai em silêncio.</div>
+          </div>
+        </div>
+        <div class="no-label">não ↓</div>
+        <div class="flow-connector"></div>
+
+        <div class="flow-box"><span class="code">push_swap(&amp;stack_a, &amp;stack_b);</span><span class="why">Executa o algoritmo — cada operação é impressa em tempo real.</span></div>
+        <div class="flow-connector"></div>
+
+        <div class="flow-box"><span class="code">free_stack(&amp;stack_a); free_stack(&amp;stack_b); return (0);</span><span class="why">Libera toda a memória alocada antes de encerrar.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ PARSER.C -->
+<section class="page" id="parser">
+  <span class="eyebrow">parser.c</span>
+  <h2 class="page-title">Do argv para a lista encadeada</h2>
+  <p class="page-desc">Cinco funções transformam texto em uma pilha validada, sem overflow e sem duplicados.</p>
+
+  <div class="sheet">
+    <div class="sheet-head"><span class="fn">int <b style="color:var(--accent)">ft_atoi</b>(const char *str, int *error)</span><span class="part">FUNC. 01</span></div>
+    <div class="sheet-body">
+      <p class="sheet-note">Converte texto em inteiro com validação de sinal, overflow e caracteres inválidos.</p>
+      <div class="flow">
+        <div class="flow-box"><span class="code">pula espaços → verifica sinal (+/-)</span></div>
+        <div class="flow-connector"></div>
+        <div class="flow-decision-row">
+          <div class="flow-decision-box"><span class="code">tem ao menos um dígito ?</span></div>
+          <div class="flow-branch"><div class="flow-branch-arrow"></div><div class="flow-branch-box"><b>NÃO →</b> *error = 1; return (0);</div></div>
+        </div>
+        <div class="no-label">sim ↓</div>
+        <div class="flow-connector"></div>
+        <div class="flow-box"><span class="code">while (é dígito) num = num*10 + (str[i]-'0'); i++;</span></div>
+        <div class="flow-connector"></div>
+        <div class="flow-decision-row">
+          <div class="flow-decision-box"><span class="code">estourou INT_MAX / INT_MIN ?</span></div>
+          <div class="flow-branch"><div class="flow-branch-arrow"></div><div class="flow-branch-box"><b>SIM →</b> *error = 1; return (0);</div></div>
+        </div>
+        <div class="no-label">não ↓</div>
+        <div class="flow-connector"></div>
+        <div class="flow-decision-row">
+          <div class="flow-decision-box"><span class="code">sobrou caractere inválido ?</span></div>
+          <div class="flow-branch"><div class="flow-branch-arrow"></div><div class="flow-branch-box"><b>SIM →</b> *error = 1; return (0);</div></div>
+        </div>
+        <div class="no-label">não ↓</div>
+        <div class="flow-connector"></div>
+        <div class="flow-box"><span class="code">return (num * sign);</span></div>
+      </div>
+      <div class="util-grid" style="margin-top:18px;">
+        <div class="util-example"><b>"42"</b> → 42, error = 0</div>
+        <div class="util-example"><b>"-42"</b> → -42, error = 0</div>
+        <div class="util-example"><b>"2147483648"</b> → 0, error = 1 (overflow)</div>
+        <div class="util-example"><b>"42a"</b> → 0, error = 1 (caractere inválido)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-head"><span class="fn">t_list *<b style="color:var(--accent)">create_node</b>(int value)</span><span class="part">FUNC. 02</span></div>
+    <div class="sheet-body">
+      <p class="sheet-note">Aloca um nó e inicializa os dois campos — a base de tudo que vem depois.</p>
+      <div class="case-row">
+        <div class="case-conditions">
+          <span class="c">node = malloc(sizeof(t_list));</span>
+          <span class="c">node-&gt;value = 42;</span>
+          <span class="c">node-&gt;next = NULL;</span>
+        </div>
+        <span class="case-arrow">→</span>
+        <div class="case-box" style="width:auto;padding:10px 18px;flex-direction:column;height:auto;gap:2px;">
+          <span class="mono" style="font-size:11px;color:var(--ink-mute);">t_list</span>
+          <span class="mono" style="font-size:14px;">value = 42</span>
+          <span class="mono" style="font-size:12px;color:var(--ink-mute);">next = NULL</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-head"><span class="fn">void <b style="color:var(--accent)">add_to_stack</b>(t_list **stack, int value)</span><span class="part">FUNC. 03</span></div>
+    <div class="sheet-body">
+      <p class="sheet-note">Percorre até o fim da lista e encaixa o novo nó — mantém a ordem de leitura do argv.</p>
+      <div id="comic-add"></div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-head"><span class="fn">int <b style="color:var(--accent)">check_duplicates</b>(t_list *stack)</span><span class="part">FUNC. 04</span></div>
+    <div class="sheet-body">
+      <p class="sheet-note">Compara cada nó com todos os que vêm depois dele — dois ponteiros aninhados.</p>
+      <div id="comic-dup"></div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-head"><span class="fn">int <b style="color:var(--accent)">parse_args</b>(int argc, char **argv, t_list **stack_a)</span><span class="part">FUNC. 05</span></div>
+    <div class="sheet-body">
+      <p class="sheet-note">Amarra as quatro funções anteriores num laço só.</p>
+      <div class="flow">
+        <div class="flow-box"><span class="code">i = 0;</span></div>
+        <div class="flow-connector"></div>
+        <div class="flow-decision-row">
+          <div class="flow-decision-box"><span class="code">while (++i &lt; argc)</span><span class="why">repete para cada argumento recebido</span></div>
+        </div>
+        <div class="flow-connector"></div>
+        <div class="flow-decision-row">
+          <div class="flow-decision-box"><span class="code">num = ft_atoi(argv[i], &amp;error);</span></div>
+          <div class="flow-branch"><div class="flow-branch-arrow"></div><div class="flow-branch-box"><b>erro →</b> return (0);</div></div>
+        </div>
+        <div class="no-label">ok ↓</div>
+        <div class="flow-connector"></div>
+        <div class="flow-box"><span class="code">add_to_stack(stack_a, num);</span><span class="why">repete o laço até o fim de argv</span></div>
+        <div class="flow-connector"></div>
+        <div class="flow-decision-row">
+          <div class="flow-decision-box"><span class="code">check_duplicates(*stack_a) ?</span></div>
+          <div class="flow-branch"><div class="flow-branch-arrow"></div><div class="flow-branch-box"><b>SIM →</b> return (0);</div></div>
+        </div>
+        <div class="no-label">não ↓</div>
+        <div class="flow-connector"></div>
+        <div class="flow-box"><span class="code">return (1);</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ SORTING.C -->
+<section class="page" id="sorting">
+  <span class="eyebrow">sorting.c</span>
+  <h2 class="page-title">Três estratégias, um dispatcher</h2>
+  <p class="page-desc">O algoritmo usado depende só do tamanho da pilha.</p>
+
+  <div class="sheet">
+    <div class="sheet-head"><span class="fn">void <b style="color:var(--accent)">push_swap</b>(t_list **stack_a, t_list **stack_b)</span><span class="part">DISPATCHER</span></div>
+    <div class="sheet-body">
+      <div class="flow">
+        <div class="flow-box"><span class="code">size = stack_size(*stack_a);</span></div>
+        <div class="flow-connector"></div>
+        <div class="flow-box"><span class="code" style="white-space:pre-line;">size ≤ 3  → sort_three(A)
+size ≤ 5  → sort_five(A, B)
+size &gt; 5  → sort_big(A, B)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-head"><span class="fn">void <b style="color:var(--accent)">sort_three</b>(t_list **stack_a)</span><span class="part">FUNC. 01</span></div>
+    <div class="sheet-body">
+      <p class="sheet-note">Só 6 combinações possíveis para 3 números — cada uma resolvida com no máximo 2 operações. Clique num caso:</p>
+      <div id="case-selector"></div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-head"><span class="fn">void <b style="color:var(--accent)">sort_five</b>(t_list **stack_a, t_list **stack_b)</span><span class="part">FUNC. 02</span></div>
+    <div class="sheet-body">
+      <p class="sheet-note">Estratégia: manda os 2 menores para B, resolve os 3 que sobram em A com sort_three, e traz os 2 de volta.</p>
+      <div id="comic-five"></div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-head"><span class="fn">void <b style="color:var(--accent)">sort_big</b>(t_list **stack_a, t_list **stack_b)</span><span class="part">FUNC. 03</span></div>
+    <div class="sheet-body">
+      <p class="sheet-note">Para mais de 5 números, o algoritmo Turk divide o intervalo de valores em <em>chunks</em> (faixas) e empurra cada faixa para B em ondas, deixando só 3 em A no final.</p>
+      <div id="chunk-diagram" style="margin:18px 0;"></div>
+      <div class="flow">
+        <div class="flow-box"><span class="code">chunk = size / 5;  i = 0;  max = size - 3;</span></div>
+        <div class="flow-connector"></div>
+        <div class="flow-box"><span class="code">while (i &lt; max) { if (A[0] ≤ i+chunk) pb(A,B); else if (A[0] ≤ i+chunk*2) { pb(A,B); rb(B); } else ra(A); i++; }</span></div>
+        <div class="flow-connector"></div>
+        <div class="flow-box"><span class="code">sort_three(A);</span><span class="why">organiza os 3 que restaram em A</span></div>
+        <div class="flow-connector"></div>
+        <div class="flow-box"><span class="code">while (B) { pa(A,B); if (A[0] &gt; A[1]) sa(A); }</span><span class="why">devolve tudo de B para A, mantendo a ordem</span></div>
+        <div class="flow-connector"></div>
+        <div class="flow-box"><span class="code">while (A[0] != min) ra(A);</span><span class="why">rotação final: coloca o menor no topo</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ UTILS.C -->
+<section class="page" id="utils">
+  <span class="eyebrow">utils.c</span>
+  <h2 class="page-title">As pequenas funções que sustentam tudo</h2>
+  <p class="page-desc">Nove funções auxiliares — a maioria é uma travessia simples da lista encadeada.</p>
+
+  <div class="sheet">
+    <div class="sheet-head"><span class="fn">int <b style="color:var(--accent)">is_sorted</b>(t_list *stack)</span><span class="part">FUNC. 01</span></div>
+    <div class="sheet-body">
+      <p class="sheet-note">Compara cada par de vizinhos; qualquer inversão já é motivo para retornar 0.</p>
+      <div id="comic-sorted"></div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-head"><span class="fn">void <b style="color:var(--accent)">free_stack</b>(t_list **stack)</span><span class="part">FUNC. 06</span></div>
+    <div class="sheet-body">
+      <p class="sheet-note">Guarda o próximo nó antes de liberar o atual — sem isso, seria um use-after-free.</p>
+      <div id="comic-free"></div>
+    </div>
+  </div>
+
+  <div class="util-grid">
+    <div class="util-card">
+      <h4>stack_size(stack)</h4>
+      <p>Conta os nós até chegar em NULL.</p>
+      <div class="util-example">[5]→[3]→[8]→[1]→NULL &nbsp;→&nbsp; <b>4</b></div>
+    </div>
+    <div class="util-card">
+      <h4>find_min / find_max(stack)</h4>
+      <p>find_max é o mesmo código de find_min, só troca &lt; por &gt;.</p>
+      <div class="util-example">[5]→[3]→[8]→[1] &nbsp;→&nbsp; min=<b>1</b>, max=<b>8</b></div>
+    </div>
+    <div class="util-card">
+      <h4>get_index(stack, value)</h4>
+      <p>Percorre contando até achar o valor — ou devolve -1.</p>
+      <div class="util-example">buscar 8 em [5]→[3]→[8]→[1] &nbsp;→&nbsp; índice <b>2</b></div>
+    </div>
+    <div class="util-card">
+      <h4>print_error(void)</h4>
+      <p>Uma única linha, direto no stderr.</p>
+      <div class="console-line console-err">write(2, "Error\n", 6);</div>
+    </div>
+    <div class="util-card">
+      <h4>ft_strlen(str)</h4>
+      <p>Conta caracteres até o terminador nulo.</p>
+      <div class="util-example">"sa"→<b>2</b> &nbsp; "ss"→<b>2</b> &nbsp; "rra"→<b>3</b></div>
+    </div>
+    <div class="util-card">
+      <h4>ft_putstr(str)</h4>
+      <p>Escreve a string no stdout — é assim que cada operação aparece no terminal.</p>
+      <div class="console-line console-out">$ sa</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ BENCHMARK -->
+<section class="page" id="benchmark">
+  <span class="eyebrow">avaliação</span>
+  <h2 class="page-title">Metas de performance</h2>
+  <p class="page-desc">A nota depende de quantas operações o algoritmo usa para ordenar números aleatórios — quanto menos, melhor.</p>
+
+  <div class="sheet">
+    <div class="sheet-body">
+      <div class="gauge-wrap">
+        <div class="gauge-title">100 números aleatórios</div>
+        <div class="gauge" id="gauge-100"></div>
+        <div class="gauge-legend">
+          <span><i class="legend-dot" style="background:var(--success)"></i>&lt; 700 → nota máxima</span>
+          <span><i class="legend-dot" style="background:var(--warn)"></i>&lt; 1100 → nota mínima</span>
+          <span><i class="legend-dot" style="background:var(--danger)"></i>&gt; 1100 → reprovado</span>
+        </div>
+      </div>
+      <div class="gauge-wrap">
+        <div class="gauge-title">500 números aleatórios</div>
+        <div class="gauge" id="gauge-500"></div>
+        <div class="gauge-legend">
+          <span><i class="legend-dot" style="background:var(--success)"></i>&lt; 5500 → nota máxima</span>
+          <span><i class="legend-dot" style="background:var(--warn)"></i>&lt; 8500 → nota mínima</span>
+          <span><i class="legend-dot" style="background:var(--danger)"></i>&gt; 8500 → reprovado</span>
+        </div>
+      </div>
+      <div class="note-callout">O algoritmo Turk (chunks) usado em sort_big é o que permite ficar dentro dessas metas para listas grandes — sort_three e sort_five sozinhos não escalam.</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>push_swap — guia visual · 42 School Porto · feito para compartilhar com a turma</footer>
+
+<script>
+/* ================= reusable stack-comic engine ================= */
+const ROLE_CLASS = {danger:'pin-danger', accent:'pin-accent', pro:'pin-pro', success:'pin-success', warn:'pin-warn'};
+const ROLE_COLOR = {danger:'var(--danger)', accent:'var(--accent)', pro:'var(--pro)', success:'var(--success)', warn:'var(--warn)'};
+const ROW_H = 50, TOP0 = 62;
+
+function mountStackComic(containerId, cfg){
+  const root = document.getElementById(containerId);
+  if(!root) return;
+  const colAx = cfg.twoStacks ? 20 : 205;
+  const colBx = 330;
+  const stageWidth = cfg.twoStacks ? 470 : 440;
+
+  // legend
+  const usedRoles = [];
+  cfg.steps.forEach(s => Object.values(s.hl||{}).forEach(r => { if(!usedRoles.includes(r)) usedRoles.push(r); }));
+  const legend = document.createElement('div');
+  legend.className = 'comic-legend';
+  legend.innerHTML = usedRoles.map(r => `<span><i class="legend-dot" style="background:${ROLE_COLOR[r]}"></i>${r}</span>`).join('');
+  root.appendChild(legend);
+
+  const stage = document.createElement('div');
+  stage.className = 'comic-stage';
+  stage.style.maxWidth = stageWidth + 'px';
+  root.appendChild(stage);
+
+  const labelA = document.createElement('div');
+  labelA.className = 'comic-collabel';
+  labelA.style.left = colAx+'px'; labelA.style.top = '4px';
+  labelA.textContent = cfg.twoStacks ? 'PILHA A' : 'PILHA';
+  stage.appendChild(labelA);
+  const topoA = document.createElement('div');
+  topoA.className = 'comic-topo';
+  topoA.style.left = colAx+'px'; topoA.style.top = (TOP0-16)+'px';
+  topoA.textContent = '▲ topo';
+  stage.appendChild(topoA);
+  if(cfg.twoStacks){
+    const labelB = document.createElement('div');
+    labelB.className = 'comic-collabel';
+    labelB.style.left = colBx+'px'; labelB.style.top = '4px';
+    labelB.textContent = 'PILHA B';
+    stage.appendChild(labelB);
+    const topoB = document.createElement('div');
+    topoB.className = 'comic-topo';
+    topoB.style.left = colBx+'px'; topoB.style.top = (TOP0-16)+'px';
+    topoB.textContent = '▲ topo';
+    stage.appendChild(topoB);
+  }
+
+  const nodeEls = {};
+  Object.keys(cfg.nodes).forEach(id=>{
+    const div = document.createElement('div');
+    div.className = 'comic-node';
+    div.innerHTML = cfg.nodes[id] + '<span class="chip"></span>';
+    stage.appendChild(div);
+    nodeEls[id] = div;
+  });
+
+  const codebox = document.createElement('div');
+  codebox.className = 'comic-code';
+  root.appendChild(codebox);
+  const whybox = document.createElement('div');
+  whybox.className = 'comic-why';
+  root.appendChild(whybox);
+
+  const nav = document.createElement('div');
+  nav.className = 'comic-nav';
+  const prevBtn = document.createElement('button'); prevBtn.textContent = '← Anterior';
+  const counter = document.createElement('span'); counter.className = 'comic-counter';
+  const nextBtn = document.createElement('button'); nextBtn.textContent = 'Próximo →';
+  nav.appendChild(prevBtn); nav.appendChild(counter); nav.appendChild(nextBtn);
+  root.appendChild(nav);
+
+  const dots = document.createElement('div');
+  dots.className = 'comic-dots';
+  root.appendChild(dots);
+  cfg.steps.forEach((s,i)=>{
+    const d = document.createElement('div');
+    d.className = 'd';
+    d.onclick = ()=>{ current = i; render(); };
+    dots.appendChild(d);
+  });
+
+  let current = 0;
+  function render(){
+    const step = cfg.steps[current];
+    (step.a||[]).forEach((id,idx)=>{
+      nodeEls[id].style.left = colAx+'px';
+      nodeEls[id].style.top = (TOP0 + idx*ROW_H) + 'px';
+      nodeEls[id].classList.remove('is-freed');
+      nodeEls[id].style.opacity = 1;
+    });
+    (step.b||[]).forEach((id,idx)=>{
+      nodeEls[id].style.left = colBx+'px';
+      nodeEls[id].style.top = (TOP0 + idx*ROW_H) + 'px';
+      nodeEls[id].classList.remove('is-freed');
+      nodeEls[id].style.opacity = 1;
+    });
+    (step.freed||[]).forEach(id=>{ nodeEls[id].classList.add('is-freed'); });
+    Object.keys(cfg.nodes).forEach(id=>{
+      Object.values(ROLE_CLASS).forEach(c=> nodeEls[id].classList.remove(c));
+      nodeEls[id].querySelector('.chip').textContent = '';
+    });
+    Object.keys(step.hl||{}).forEach(id=>{
+      const role = step.hl[id];
+      nodeEls[id].classList.add(ROLE_CLASS[role]);
+      nodeEls[id].querySelector('.chip').textContent = role;
+    });
+    codebox.textContent = step.code;
+    whybox.textContent = step.why||'';
+    counter.textContent = 'Passo '+(current+1)+' de '+cfg.steps.length;
+    prevBtn.disabled = current===0;
+    nextBtn.disabled = current===cfg.steps.length-1;
+    Array.from(dots.children).forEach((d,i)=> d.classList.toggle('active', i===current));
+  }
+  prevBtn.onclick = ()=>{ if(current>0){current--; render();} };
+  nextBtn.onclick = ()=>{ if(current<cfg.steps.length-1){current++; render();} };
+  render();
+}
+
+/* ---- add_to_stack ---- */
+mountStackComic('comic-add', {
+  twoStacks:false,
+  nodes:{n1:5,n2:3,n3:8},
+  steps:[
+    {a:['n1','n2'], hl:{}, code:'add_to_stack(&stack, 8);', why:'Estado inicial: a lista tem 5 → 3. Vamos adicionar o valor 8 no final.'},
+    {a:['n1','n2'], hl:{}, code:'node = create_node(8);', why:'Cria o novo nó (ainda não conectado a nada).'},
+    {a:['n1','n2'], hl:{}, code:'if (!*stack) { *stack = node; return; }', why:'A lista não está vazia, então esse atalho não se aplica.'},
+    {a:['n1','n2'], hl:{n2:'pro'}, code:'last = *stack; while (last->next) last = last->next;', why:'last percorre até achar o último nó (3), que não tem next.'},
+    {a:['n1','n2','n3'], hl:{n2:'pro',n3:'accent'}, code:'last->next = node;', why:'3 passa a apontar para o novo nó (8) — ele vira o novo final da lista.'}
+  ]
+});
+
+/* ---- check_duplicates ---- */
+mountStackComic('comic-dup', {
+  twoStacks:false,
+  nodes:{n1:5,n2:3,n3:8,n4:3},
+  steps:[
+    {a:['n1','n2','n3','n4'], hl:{n1:'danger'}, code:'current = stack;', why:'current começa no primeiro nó (5).'},
+    {a:['n1','n2','n3','n4'], hl:{n1:'danger',n2:'accent'}, code:'check = current->next;', why:'check percorre o resto da lista comparando com current: 5≠3.'},
+    {a:['n1','n2','n3','n4'], hl:{n1:'danger',n3:'accent'}, code:'check = check->next;', why:'5≠8, continua avançando.'},
+    {a:['n1','n2','n3','n4'], hl:{n1:'danger',n4:'accent'}, code:'check = check->next;', why:'5≠3 (o segundo 3). Nenhum bateu — avança current.'},
+    {a:['n1','n2','n3','n4'], hl:{n2:'danger',n3:'accent'}, code:'current = current->next; check = current->next;', why:'Agora current = 3. Comparando: 3≠8.'},
+    {a:['n1','n2','n3','n4'], hl:{n2:'danger',n4:'accent'}, code:'if (current->value == check->value) return (1);', why:'3 == 3 → encontrou um duplicado! Retorna 1 imediatamente.'}
+  ]
+});
+
+/* ---- is_sorted ---- */
+mountStackComic('comic-sorted', {
+  twoStacks:false,
+  nodes:{n1:1,n2:3,n3:5,n4:8},
+  steps:[
+    {a:['n1','n2','n3','n4'], hl:{n1:'success',n2:'success'}, code:'stack->value > stack->next->value ?', why:'1 > 3? Não — continua para o próximo par.'},
+    {a:['n1','n2','n3','n4'], hl:{n2:'success',n3:'success'}, code:'stack->value > stack->next->value ?', why:'3 > 5? Não — continua.'},
+    {a:['n1','n2','n3','n4'], hl:{n3:'success',n4:'success'}, code:'stack->value > stack->next->value ?', why:'5 > 8? Não — chegou ao fim da lista.'},
+    {a:['n1','n2','n3','n4'], hl:{}, code:'return (1);', why:'Nenhuma inversão encontrada: a pilha está ordenada.'}
+  ]
+});
+
+/* ---- free_stack ---- */
+mountStackComic('comic-free', {
+  twoStacks:false,
+  nodes:{n1:5,n2:3,n3:8},
+  steps:[
+    {a:['n1','n2','n3'], hl:{}, code:'if (!stack || !*stack) return;', why:'A pilha não está vazia — segue para o loop.'},
+    {a:['n1','n2','n3'], hl:{n1:'danger',n2:'accent'}, code:'tmp = (*stack)->next;', why:'tmp guarda o segundo nó (3) antes de apagar o primeiro.'},
+    {a:['n2','n3'], hl:{n2:'accent'}, freed:['n1'], code:'free(*stack);', why:'O primeiro nó (5) é liberado da memória — ele já não existe mais.'},
+    {a:['n2','n3'], hl:{n2:'danger',n3:'accent'}, freed:['n1'], code:'*stack = tmp;', why:'O topo da pilha agora é o nó 3. Repete o processo para os próximos.'},
+    {a:['n3'], hl:{n3:'accent'}, freed:['n1','n2'], code:'tmp = (*stack)->next; free(*stack); *stack = tmp;', why:'3 é liberado, e o topo passa a ser 8.'},
+    {a:[], hl:{}, freed:['n1','n2','n3'], code:'*stack = NULL;', why:'Todos os nós foram liberados — a pilha some por completo.'}
+  ]
+});
+
+/* ---- sort_five (two stacks) ---- */
+mountStackComic('comic-five', {
+  twoStacks:true,
+  nodes:{a1:5,a2:3,a3:8,a4:1,a5:4},
+  steps:[
+    {a:['a1','a2','a3','a4','a5'], b:[], hl:{a4:'danger'}, code:'find_min(A) → 1 (índice 3)', why:'Localizamos o menor valor da pilha A.'},
+    {a:['a1','a2','a3','a5'], b:['a4'], hl:{}, code:'rotaciona até o topo; pb(A, B);', why:'1 vai para o topo e é movido para B. A: [5,3,8,4] B: [1]'},
+    {a:['a1','a2','a3','a5'], b:['a4'], hl:{a2:'danger'}, code:'find_min(A) → 3 (índice 1)', why:'Repetimos: agora o menor de A é o 3.'},
+    {a:['a1','a3','a5'], b:['a2','a4'], hl:{}, code:'rotaciona até o topo; pb(A, B);', why:'3 vai para B. A: [5,8,4] B: [3,1]'},
+    {a:['a5','a1','a3'], b:['a2','a4'], hl:{}, code:'sort_three(A);', why:'Os 3 que sobraram em A (5,8,4) são ordenados: vira [4,5,8].'},
+    {a:['a2','a5','a1','a3'], b:['a4'], hl:{}, code:'pa(A, B);', why:'Traz o topo de B (3) de volta para A.'},
+    {a:['a4','a2','a5','a1','a3'], b:[], hl:{}, code:'pa(A, B);', why:'Traz o último (1) de volta. A final: [1,3,4,5,8] ✓ ordenado.'}
+  ]
+});
+
+/* ================= sort_three case selector ================= */
+(function(){
+  const cases = {
+    '123':{vals:[1,2,3], conds:['a>b? não','b>c? —'], result:'já ordenado — nada a fazer', final:[1,2,3]},
+    '213':{vals:[2,1,3], conds:['a>b? sim','b<c? sim','a<c? sim'], result:'sa', final:[1,2,3]},
+    '231':{vals:[2,3,1], conds:['a<b? sim','b>c? sim','a>c? sim'], result:'rra', final:[1,2,3]},
+    '312':{vals:[3,1,2], conds:['a>b? sim','b<c? sim','a>c? sim'], result:'ra', final:[1,2,3]},
+    '132':{vals:[1,3,2], conds:['a<b? sim','b>c? sim','a<c? sim'], result:'sa + ra', final:[1,2,3]},
+    '321':{vals:[3,2,1], conds:['a>b? sim','b>c? sim'], result:'sa + rra', final:[1,2,3]},
+  };
+  const root = document.getElementById('case-selector');
+  const tabs = document.createElement('div'); tabs.className = 'case-tabs';
+  const body = document.createElement('div');
+  root.appendChild(tabs); root.appendChild(body);
+
+  function render(key){
+    const c = cases[key];
+    Array.from(tabs.children).forEach(b=> b.classList.toggle('active', b.dataset.k===key));
+    body.innerHTML = `
+      <div class="case-row" style="margin-bottom:14px;">
+        <div class="case-boxes">${c.vals.map(v=>`<div class="case-box">${v}</div>`).join('')}</div>
+        <span class="case-arrow">→</span>
+        <div class="case-conditions">${c.conds.map(t=>`<span class="c ${t.includes('sim')?'yes':t.includes('não')?'no':''}">${t}</span>`).join('')}</div>
+        <span class="case-arrow">→</span>
+        <div class="case-result">${c.result}</div>
+        <span class="case-arrow">→</span>
+        <div class="case-boxes">${c.final.map(v=>`<div class="case-box" style="border-color:var(--success);color:var(--success);">${v}</div>`).join('')}</div>
+      </div>`;
+  }
+  Object.keys(cases).forEach((key,i)=>{
+    const btn = document.createElement('button');
+    btn.dataset.k = key;
+    btn.textContent = '['+cases[key].vals.join(',')+']';
+    btn.onclick = ()=> render(key);
+    tabs.appendChild(btn);
+  });
+  render('123');
+})();
+
+/* ================= chunk diagram (sort_big) ================= */
+(function(){
+  const root = document.getElementById('chunk-diagram');
+  const chunks = [
+    {range:'0–20', color:'var(--danger)'},
+    {range:'21–40', color:'var(--warn)'},
+    {range:'41–60', color:'var(--accent)'},
+    {range:'61–80', color:'var(--pro)'},
+    {range:'81–100', color:'var(--success)'}
+  ];
+  root.innerHTML = `
+    <div style="display:flex;gap:3px;height:34px;border-radius:8px;overflow:hidden;margin-bottom:6px;">
+      ${chunks.map(c=>`<div style="flex:1;background:${c.color};opacity:.75;"></div>`).join('')}
+    </div>
+    <div style="display:flex;gap:3px;font-family:var(--font-mono);font-size:10.5px;color:var(--ink-mute);">
+      ${chunks.map(c=>`<div style="flex:1;text-align:center;">${c.range}</div>`).join('')}
+    </div>
+    <p style="font-size:12.5px;color:var(--ink-dim);margin-top:10px;">Exemplo com 100 números: chunk_size = 100/5 = 20. Cada faixa de valores é empurrada para B numa "onda", até sobrarem só 3 números em A.</p>
+  `;
+})();
+
+/* ================= benchmark gauges ================= */
+function buildGauge(id, max, greenMax, amberMax){
+  const el = document.getElementById(id);
+  const scaleMax = amberMax * 1.25;
+  const greenPct = (greenMax/scaleMax)*100;
+  const amberPct = (amberMax/scaleMax)*100;
+  el.innerHTML = `
+    <div class="gauge-zone" style="left:0;width:${greenPct}%;background:var(--success-ink);"></div>
+    <div class="gauge-zone" style="left:${greenPct}%;width:${amberPct-greenPct}%;background:var(--warn-ink);"></div>
+    <div class="gauge-zone" style="left:${amberPct}%;right:0;background:var(--danger-ink);"></div>
+    <div class="gauge-marker" style="left:${greenPct}%;"><span class="lbl">${greenMax}</span></div>
+    <div class="gauge-marker" style="left:${amberPct}%;"><span class="lbl">${amberMax}</span></div>
+  `;
+}
+buildGauge('gauge-100', 100, 700, 1100);
+buildGauge('gauge-500', 500, 5500, 8500);
+
+/* ================= tab switching ================= */
+document.querySelectorAll('#tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('section.page').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.target).classList.add('active');
+    window.scrollTo({top:0, behavior:'instant'});
+  });
+});
+</script>
+</body>
+</html>
