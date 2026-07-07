@@ -2113,7 +2113,10 @@ function runPushSwap(initial){
     consoleBox.innerHTML = html || '<div class="ln">(pilha já ordenada — nenhuma operação)</div>';
     if(currentIndex>0){
       const cur = consoleBox.querySelector('.ln.cur');
-      if(cur) cur.scrollIntoView({block:'nearest'});
+      if(cur){
+        const target = cur.offsetTop - consoleBox.clientHeight + cur.offsetHeight + 8;
+        consoleBox.scrollTop = Math.max(0, target);
+      }
     }
   }
 
