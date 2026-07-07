@@ -42,7 +42,7 @@ push_swap é um projeto da 42 School: ordenar uma lista de números usando apena
 
 ## Autor
 
-Gabriel — 42 School, campus Porto (`gcelesti`)
+Gabriel — 42 School, campus SP (`gcelesti`)
 
 ---
 
