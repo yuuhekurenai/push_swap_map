@@ -46,4 +46,4 @@ Gabriel — 42 School, campus SP (`gcelesti`)
 
 ---
 
-*Feito com Claude para compartilhar com a turma.*
+*Feito para compartilhar com a turma.*
